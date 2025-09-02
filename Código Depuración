@@ -1,121 +1,62 @@
-library(readxl)
-library(dplyr)
-library(tidyr)
-
-# Definir la ruta del archivo y el nombre de la hoja de calculo.
-# Asegurar que el archivo '_WHR-Happiness - Dataset - v5.xlsx' este en la misma carpeta.
-file_path <- '_WHR-Happiness - Dataset - v5.xlsx'
-sheet_name <- 'input-data2008-2023_Happiness_I'
-
-# --- CARGA Y LIMPIEZA DE DATOS ---
-load_and_clean_data <- function(file_path, sheet_name) {
-  # Cargar el archivo de Excel en un data frame.
-  df <- read_excel(file_path, sheet = sheet_name)
-  
-  # Limpiar el data frame: eliminar columnas que no son utiles.
-  df <- df %>% 
-    select(-starts_with("Unnamed")) %>%
-    select(-starts_with("GM_NAME")) %>%
-    select(-starts_with("Source")) %>%
-    select(-starts_with("https://worldhappiness.report"))
-  
-  # Renombrar columnas clave para mayor claridad y consistencia.
-  df <- df %>%
-    rename(
-      Country = `Country name`,
-      Year = year,
-      Happiness = `Life Ladder`,
-      GDP = `Log GDP per capita`,
-      SocialSupport = `Social support`,
-      HealthyLifeExpectancy = `Healthy life expectancy at birth`,
-      Freedom = `Freedom to make life choices`,
-      Corruption = `Perceptions of corruption`,
-      Generosity = Generosity
-    )
-    
-  # Eliminar filas con valores faltantes en las columnas clave del analisis.
-  df <- df %>%
-    drop_na(Happiness, GDP, SocialSupport, HealthyLifeExpectancy, Freedom, Corruption)
-  
-  return(df)
-}
-
-# Ejecutar la funcion para obtener el data frame limpio.
-df_clean <- load_and_clean_data(file_path, sheet_name)
-
-# Imprimir una vista previa de los datos limpios para verificacion.
-print(head(df_clean))
-print(glimpse(df_clean))
-
-# El data frame 'df_clean' ahora contiene los datos limpios y listos para el analisis.
-```
-
-El final:
+```{r data_loading, include=FALSE}
 # --- MI PROCESO DE CARGA Y LIMPIEZA DE DATOS ---
 
-# 1. Primero, defino dónde están mis archivos para que R sepa dónde buscarlos.
-# Le doy la ruta del archivo Excel y del CSV de población.
+# 1. Primero, defino dÃ³nde estÃ¡n mis archivos para que R sepa dÃ³nde buscarlos.
+# Ambos datasets (felicidad y poblaciÃ³n) estÃ¡n en el mismo archivo Excel.
 file_path <- '_WHR-Happiness - Dataset - v5.xlsx'
-sheet_name <- 'input-data2008-2023_Happiness_I'
-population_csv_path <- '_WHR-Happiness - Dataset - v5.xlsx - datapop#v8@fasttrackyearcountri.csv'
+sheet_name_happiness <- 'input-data2008-2023_Happiness_I' # Nombre de la hoja de felicidad
+sheet_name_population <- 'datapop#v8@fasttrackyearcountri' 
 
-# 2. He creado una función para limpiar mis datos de felicidad. La he diseñado para que haga varias cosas:
+# 2. He creado una funciÃ³n para limpiar mis datos de felicidad.
 load_and_clean_data <- function(file_path, sheet_name) {
-  # Primero, le digo que lea la hoja de cálculo correcta del archivo Excel.
   df <- read_excel(file_path, sheet = sheet_name)
   
-  # Después, selecciono solo las columnas que son útiles para mi análisis.
-  # Así, quito todo el ruido y me quedo con lo esencial.
   df <- df %>%
     select(
       `Country name`, year, `Life Ladder`, `Log GDP per capita`, `Social support`,
       `Healthy life expectancy at birth`, `Freedom to make life choices`,
       `Perceptions of corruption`, Generosity
     ) %>%
-    # Ahora, renombro las columnas a nombres más cortos y manejables.
-    # Esto hará que el resto de mi código sea mucho más limpio y fácil de entender.
     rename(
       Country = `Country name`, Year = year, Happiness = `Life Ladder`,
       GDP = `Log GDP per capita`, SocialSupport = `Social support`,
       HealthyLifeExpectancy = `Healthy life expectancy at birth`,
       Freedom = `Freedom to make life choices`, Corruption = `Perceptions of corruption`
     ) %>%
-    # Por último, elimino cualquier fila que no tenga datos en las columnas más importantes.
-    # Esto es clave para que los gráficos funcionen sin errores.
     drop_na(Happiness, GDP, SocialSupport, HealthyLifeExpectancy, Freedom, Corruption)
   
-  # La función me devuelve la tabla ya limpia.
   return(df)
 }
 
-# 3. También he creado una función específica para cargar los datos de población desde el archivo CSV.
-load_population_data <- function(file_path) {
-    df_pop <- read.csv(file_path)
-    # Al igual que antes, selecciono y renombro las columnas que necesito.
+# 3. TambiÃ©n he creado una funciÃ³n especÃ­fica para cargar los datos de poblaciÃ³n
+load_population_data <- function(file_path, sheet_name) {
+    df_pop <- read_excel(file_path, sheet = sheet_name) 
+
     df_pop <- df_pop %>%
         select(name, time, Population) %>%
-        rename(Country = name, Year = time)
+        rename(Country = name, Year = time) %>%
+        drop_na(Population) 
+  
     return(df_pop)
 }
 
-# 4. ¡Manos a la obra! Ejecuto las funciones que he creado y uno los resultados.
-df_clean <- load_and_clean_data(file_path, sheet_name)
-df_pop <- load_population_data(population_csv_path)
+# 4. Ejecuto las funciones que he creado y uno los resultados.
+# Paso los nombres de las hojas correctas a cada funciÃ³n.
+df_clean <- load_and_clean_data(file_path, sheet_name_happiness)
+df_pop <- load_population_data(file_path, sheet_name_population) 
 
-# Con left_join, uno mis dos tablas. Busco las filas que coincidan en País y Año
-# para tener toda la información en un único sitio: mi tabla 'df_final'.
+# Con left_join, uno mis dos tablas. Busco las filas que coincidan en PaÃ­s y AÃ±o
+# para tener toda la informaciÃ³n en un Ãºnico sitio: mi tabla 'df_final'.
 df_final <- left_join(df_clean, df_pop, by = c("Country", "Year")) %>%
-            # Me aseguro de quitar filas si no tienen dato de población.
+            # Me aseguro de quitar filas si no tienen dato de poblaciÃ³n.
             drop_na(Population) 
 
-# 5. Para el mapa del mundo, necesito códigos de país estandarizados (por ejemplo, 'ESP' para España).
-# Uso la función countrycode para que me los genere automáticamente.
+# 5. Para el mapa del mundo, necesito cÃ³digos de paÃ­s estandarizados (por ejemplo, 'ESP' para EspaÃ±a).
+# Uso la funciÃ³n countrycode para que me los genere automÃ¡ticamente.
 df_final$iso_a3 <- countrycode(df_final$Country, "country.name", "iso3c")
 
-# 6. Finalmente, creo una lista con todos los nombres de los países.
-# La usaré más adelante para construir los menús desplegables de mi dashboard.
+# 6. Finalmente, creo una lista con todos los nombres de los paÃ­ses.
+
 country_list <- unique(df_final$Country)
 
-# El data frame 'df_final' ahora contiene los datos limpios, unidos y listos para el análisis.
-# Imprimo una vista previa para verificar que todo está correcto.
-print(head(df_final))
+```
