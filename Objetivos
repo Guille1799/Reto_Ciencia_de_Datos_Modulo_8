@@ -1,0 +1,13 @@
+Tarea 2. Formulación de los objetivos
+Formula un objetivo principal del proyecto de Ciencia de Datos así como varios objetivos específicos.
+Objetivo Principal
+
+El objetivo principal de este proyecto es desarrollar una visualización interactiva y reproducible que permita al público general explorar los factores que influyen en la felicidad global, identificando tendencias a lo largo del tiempo y comparando países de manera intuitiva.
+
+Objetivos Específicos
+Explorar la relación entre la felicidad y la riqueza: El proyecto debe visualizar la correlación entre la puntuación de felicidad (Life Ladder) y la riqueza de un país (Log GDP per capita).
+Analizar la evolución temporal de la felicidad: La visualización debe mostrar cómo las puntuaciones de felicidad cambian a lo largo de los años para países específicos, permitiendo identificar tendencias o fluctuaciones importantes.
+Comparar los factores de apoyo: El proyecto debe permitir al usuario comparar el papel de factores como el apoyo social, la esperanza de vida saludable y la percepción de la corrupción en la felicidad de diferentes países.
+Demostrar la transparencia y reproducibilidad del proyecto: El proyecto debe incluir todo el código y los datos necesarios para que cualquier persona pueda replicar los resultados, como parte del movimiento de la ciencia abierta.
+
+
