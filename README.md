@@ -1,2 +1,1 @@
-# Reto_Ciencia_de_Datos_Modulo_8
-Reto 2 - Modulo 8
+Hola profe, no he conseguido descargar el dashboard en un archivo HTML. Lo voy a seguir intentando. Disculpe las molestias.
