@@ -1,0 +1,90 @@
+---
+title: "Factores Clave de la Felicidad Mundial"
+author: "Guillermo Martin de Oliva"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+# Opciones globales y carga de librerías
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+
+# --- PROCESO DE CARGA Y LIMPIEZA DE DATOS ---
+file_path <- '_WHR-Happiness - Dataset - v5.xlsx'
+sheet_name_happiness <- 'input-data2008-2023_Happiness_I'
+sheet_name_population <- 'datapop#v8@fasttrackyearcountri'
+
+load_and_clean_data <- function(file_path, sheet_name) {
+  df <- read_excel(file_path, sheet = sheet_name)
+  df <- df %>%
+    select(
+      `Country name`, year, `Life Ladder`, `Log GDP per capita`, `Social support`
+    ) %>%
+    rename(
+      Country = `Country name`, Year = year, Happiness = `Life Ladder`,
+      GDP = `Log GDP per capita`, SocialSupport = `Social support`
+    ) %>%
+    drop_na(Happiness, GDP, SocialSupport)
+  return(df)
+}
+
+df_final <- load_and_clean_data(file_path, sheet_name_happiness)
+```
+
+## Introducción y Objetivos
+
+### ¿Qué factores influyen en la felicidad de un país?
+
+- Este proyecto analiza los datos del **World Happiness Report** para identificar las variables más importantes asociadas a la felicidad.
+- El análisis se basa en **`r nrow(df_final)`** observaciones completas de países entre los años **`r min(df_final$Year)`** y **`r max(df_final$Year)`**.
+- **Objetivo principal:** Visualizar la relación entre la riqueza, el apoyo social y la felicidad.
+
+
+## Tabla Resumen de Indicadores
+
+### Una Mirada a los Datos
+A continuación, se presentan las estadísticas descriptivas para las variables clave del estudio.
+
+```{r}
+df_summary <- df_final %>%
+  select(Happiness, GDP, SocialSupport)
+
+kable(summary(df_summary), caption = "Estadísticas Descriptivas de las Variables Principales.")
+```
+
+La puntuación media de felicidad (`Happiness`) a nivel global en el periodo estudiado es de `r round(mean(df_final$Happiness), 2)`.
+
+
+## Hallazgo Principal: Riqueza y Felicidad
+
+### ¿Son los países más ricos más felices?
+
+El gráfico muestra una clara correlación positiva entre el PIB per cápita y la puntuación de felicidad.
+
+```{r gdp_happiness_plot, fig.align='center', out.width='80%'}
+ggplot(df_final, aes(x = GDP, y = Happiness)) +
+  geom_point(alpha = 0.4, color = "#2980b9") +
+  geom_smooth(method = "lm", color = "#e74c3c", se = FALSE) +
+  labs(
+    title = "Relación entre PIB per Cápita y Felicidad",
+    x = "Logaritmo del PIB per Cápita",
+    y = "Puntuación de Felicidad"
+  ) +
+  theme_minimal(base_size = 14)
+```
+
+C## Conclusiones
+
+### Resumen de Hallazgos
+
+- **Confirmado:** Existe una fuerte y positiva relación entre la riqueza de un país y su nivel de felicidad.
+- **Apoyo Social:** El apoyo social también es un predictor clave del bienestar (como se ve en la tabla resumen).
+- **Próximos Pasos:** Para una exploración más detallada, el **dashboard interactivo** permite analizar estas tendencias por año y comparar países específicos.
+
+¡Gracias!
+
