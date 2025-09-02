@@ -59,4 +59,10 @@ df_final$iso_a3 <- countrycode(df_final$Country, "country.name", "iso3c")
 
 country_list <- unique(df_final$Country)
 
+# (Opcional, en el codigo final he usado el country_list) Guardar la base de datos limpia en un nuevo archivo
+write.csv(df_final, "datos_felicidad_limpios.csv", row.names = FALSE)
+
 ```
+
+# (Opcional) Guardar la base de datos limpia en un nuevo archivo
+write.csv(df_final, "datos_felicidad_limpios.csv", row.names = FALSE)
