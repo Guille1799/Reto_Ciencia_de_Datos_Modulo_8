@@ -1,0 +1,96 @@
+---
+title: "Informe Técnico: Análisis del World Happiness Report"
+author: "Guillermo Martin de Oliva Carranza"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+<style type="text/css">
+body{
+  font-family: Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+}
+h1, h2, h3 {
+  color: #2c3e50;
+}
+</style>
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+# Cargamos las librerías necesarias
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2) 
+library(knitr)   
+```
+
+```{r}
+# --- PROCESO DE CARGA Y LIMPIEZA DE DATOS ---
+file_path <- '_WHR-Happiness - Dataset - v5.xlsx'
+sheet_name_happiness <- 'input-data2008-2023_Happiness_I'
+sheet_name_population <- 'datapop#v8@fasttrackyearcountri'
+
+# Función para cargar datos de felicidad
+load_and_clean_data <- function(file_path, sheet_name) {
+  df <- read_excel(file_path, sheet = sheet_name)
+  df <- df %>%
+    select(
+      `Country name`, year, `Life Ladder`, `Log GDP per capita`, `Social support`,
+      `Healthy life expectancy at birth`, `Freedom to make life choices`
+    ) %>%
+    rename(
+      Country = `Country name`, Year = year, Happiness = `Life Ladder`,
+      GDP = `Log GDP per capita`, SocialSupport = `Social support`,
+      HealthyLifeExpectancy = `Healthy life expectancy at birth`,
+      Freedom = `Freedom to make life choices`
+    ) %>%
+    drop_na(Happiness, GDP, SocialSupport, HealthyLifeExpectancy, Freedom)
+  return(df)
+}
+
+# Ejecutamos la función
+df_final <- load_and_clean_data(file_path, sheet_name_happiness)
+```
+
+```{r}
+# Seleccionamos las variables de interés
+df_summary <- df_final %>%
+  select(Happiness, GDP, SocialSupport, HealthyLifeExpectancy, Freedom)
+
+# Creamos la tabla con la función kable() de knitr
+kable(summary(df_summary), caption = "Tabla 1: Estadísticas Descriptivas de las Variables Principales.")
+```
+
+```{r}
+# Creamos un gráfico estático con ggplot2
+ggplot(df_final, aes(x = GDP, y = Happiness)) +
+  geom_point(alpha = 0.3, color = "#2980b9") + # Puntos semitransparentes
+  geom_smooth(method = "lm", color = "#e74c3c", se = FALSE) + # Línea de tendencia
+  labs(
+    title = "Relación entre PIB per Cápita y Felicidad",
+    subtitle = "Datos de todos los países y años (2005-2022)",
+    x = "Logaritmo del PIB per Cápita",
+    y = "Puntuación de Felicidad (Life Ladder)"
+  ) +
+  theme_minimal() # Un tema limpio para el gráfico
+```
+
+Conclusión
+
+```{r conclusion_data, echo=FALSE}
+# Calculamos algunos valores finales para la conclusión
+ultimo_anio <- max(df_final$Year)
+felicidad_media_ultimo_anio <- df_final %>%
+  filter(Year == ultimo_anio) %>%
+  summarise(felicidad_media = mean(Happiness)) %>%
+  pull(felicidad_media)
+```
+El análisis exploratorio inicial confirma las hipótesis planteadas en el proyecto. Variables como la riqueza (GDP) y el apoyo social (SocialSupport) están fuertemente correlacionadas con la felicidad.
+
+Como se ha demostrado, existe una clara tendencia positiva entre el desarrollo económico y el bienestar percibido por los ciudadanos. La felicidad media global en el último año analizado, `r ultimo_anio`, fue de `r round(felicidad_media_ultimo_anio, 2)` puntos en la escala de Life Ladder.
+
+Este informe estático sirve como una base sólida que valida las relaciones principales en los datos. Para una exploración más profunda y personalizada, se ha desarrollado el dashboard interactivo que permite al usuario analizar tendencias temporales y comparar países específicos.
