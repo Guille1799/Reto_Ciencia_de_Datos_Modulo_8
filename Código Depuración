@@ -1,2 +1,51 @@
-# Reto_Ciencia_de_Datos_Modulo_8
-Reto 2 - Modulo 8
+library(readxl)
+library(dplyr)
+library(tidyr)
+
+# Definir la ruta del archivo y el nombre de la hoja de calculo.
+# Asegurar que el archivo '_WHR-Happiness - Dataset - v5.xlsx' este en la misma carpeta.
+file_path <- '_WHR-Happiness - Dataset - v5.xlsx'
+sheet_name <- 'input-data2008-2023_Happiness_I'
+
+# --- CARGA Y LIMPIEZA DE DATOS ---
+load_and_clean_data <- function(file_path, sheet_name) {
+  # Cargar el archivo de Excel en un data frame.
+  df <- read_excel(file_path, sheet = sheet_name)
+  
+  # Limpiar el data frame: eliminar columnas que no son utiles.
+  df <- df %>% 
+    select(-starts_with("Unnamed")) %>%
+    select(-starts_with("GM_NAME")) %>%
+    select(-starts_with("Source")) %>%
+    select(-starts_with("https://worldhappiness.report"))
+  
+  # Renombrar columnas clave para mayor claridad y consistencia.
+  df <- df %>%
+    rename(
+      Country = `Country name`,
+      Year = year,
+      Happiness = `Life Ladder`,
+      GDP = `Log GDP per capita`,
+      SocialSupport = `Social support`,
+      HealthyLifeExpectancy = `Healthy life expectancy at birth`,
+      Freedom = `Freedom to make life choices`,
+      Corruption = `Perceptions of corruption`,
+      Generosity = Generosity
+    )
+    
+  # Eliminar filas con valores faltantes en las columnas clave del analisis.
+  df <- df %>%
+    drop_na(Happiness, GDP, SocialSupport, HealthyLifeExpectancy, Freedom, Corruption)
+  
+  return(df)
+}
+
+# Ejecutar la funcion para obtener el data frame limpio.
+df_clean <- load_and_clean_data(file_path, sheet_name)
+
+# Imprimir una vista previa de los datos limpios para verificacion.
+print(head(df_clean))
+print(glimpse(df_clean))
+
+# El data frame 'df_clean' ahora contiene los datos limpios y listos para el analisis.
+```
