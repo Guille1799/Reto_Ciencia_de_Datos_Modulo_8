@@ -63,6 +63,3 @@ country_list <- unique(df_final$Country)
 write.csv(df_final, "datos_felicidad_limpios.csv", row.names = FALSE)
 
 ```
-
-# (Opcional) Guardar la base de datos limpia en un nuevo archivo
-write.csv(df_final, "datos_felicidad_limpios.csv", row.names = FALSE)
